@@ -1,0 +1,5 @@
+This is a second test to check how you can find PR Rework for a PR that wasn't closed and re-opened as a new one. Aim is to check:
+A) If someone can comment on a commit prior to pull request initiated
+B) After Pull Request Initiated, add a comment but don't close PR
+C) Rectify fix as per comment
+D) Merge.
