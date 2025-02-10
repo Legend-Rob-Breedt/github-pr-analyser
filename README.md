@@ -6,8 +6,8 @@ That other guy complained I didn't put any smiley faces in ;-)
 
 Apparently its also not long enough!
 
-How about this
-  , ; ,   .-'"""'-.   , ; ,
+How about this<pre>
+<div>  , ; ,   .-'"""'-.   , ; ,
   \\|/  .'         '.  \|//
    \-;-/   ()   ()   \-;-/
    // ;               ; \\
@@ -15,5 +15,6 @@ How about this
  `-----\'.'-.....-'.'/-----'
         '.'.-.-,_.'.'
           '(  (..-'
-            '-'
+            '-'</div>
+  </pre>
 Hopefully its good enough now!
