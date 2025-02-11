@@ -3,3 +3,9 @@ A) If someone can comment on a commit prior to pull request initiated
 B) After Pull Request Initiated, add a comment but don't close PR
 C) Rectify fix as per comment
 D) Merge.
+
+Whats been done:
+1. Committed new file.
+2. Request review.
+3. Some other guy commented on the changes and asked for updates.
+4. PR still open. Now updating file again to see if PR includes these changes now.
