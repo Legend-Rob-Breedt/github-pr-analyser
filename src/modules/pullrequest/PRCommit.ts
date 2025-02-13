@@ -1,8 +1,8 @@
 export interface PRCommit {
-    sha: string;
     author: string;
-    date: string;
-    linesAdded: number;
-    linesRemoved: number;
-    type: 'commit';
+    date: Date;
+    additions: number;
+    deletions: number;
+    title: string;
 }
+
