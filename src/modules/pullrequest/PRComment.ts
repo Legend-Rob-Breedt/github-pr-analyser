@@ -1,6 +1,6 @@
-//Issue - Comment made by author on PR
-//Review - Comment made by another on PR
-//Code Comment - Comment made on a specific line of code
+//Issue - Comment made by author of PR
+//Review - Comment made by anyone reviewing PR
+//Code Comment - Comment made by anyone on a specific line of code
 
 export interface PRComment {
     author: string;

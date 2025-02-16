@@ -6,14 +6,23 @@ import {execSync} from "child_process";
 import {Octokit} from "@octokit/rest";
 import {REPO_DIR, ORG_NAME, PAGE_SIZE, PR_TITLE_MATURITY_LENGTH, REPO_NAME, USER_NAME} from "../../constants";
 
+interface Pull {
+  repository: string;
+  number: number
+  title: string
+  author: string;
+  createdAt: Date | null;
+  mergedAt: Date | null;
+  state: string;
+}
+
 export interface PullRequest {
     repository: string;
     number: number
     title: string
     author: string;
     createdAt: Date;
-    mergedAt?: Date | null;
-    mergeState: string;
+    mergedAt: Date | null;
     state: string;
     additions: number;
     deletions: number;
@@ -21,19 +30,46 @@ export interface PullRequest {
     lastProcessed: Date;
     comments: PRComment[];
     commits: PRCommit[];
-    initialCommitsCount: number; // total number of commits added BEFORE initial PR raised.
-    initialCommitAdditions: number; // total lines additions done on all commits added BEFORE initial PR raised.
-    initialCommitDeletions: number; // total lines deletions done on all commits added BEFORE initial PR raised.
-    reworkCommitsCount: number; // total number of commits added AFTER initial PR raised.
-    reworkCommitsAdditions: number; // total lines additions done on all commits added AFTER initial PR raised.
-    reworkCommitsDeletions: number; // total lines deletions done on all commits added AFTER initial PR raised.
-    totalPRChangeAdditions: number; // total lines additions done by adding all additions to each individual commit together
-    totalPRChangeDeletions: number; // total lines deletions done by adding all deletions to each individual commit together
+    initialCommits: {
+        count: number; // total number of commits added BEFORE initial PR raised.
+        additions: number; // total lines additions done on all commits added BEFORE initial PR raised.
+        deletions: number; // total lines deletions done on all commits added BEFORE initial PR raised.
+    }
+    reworkCommits: {
+        count: number // total number of commits added AFTER initial PR raised.
+        additions: number; // total lines additions done on all commits added AFTER initial PR raised.
+        deletions: number; // total lines deletions done on all commits added AFTER initial PR raised.
+    };
     maturity: number //Measure of how refined a pull request (PR) is when it is submitted for review. Measured as percentage.
     codingTime: number //Time taken to code the PR - measured in minutes till last commit of the PR
-    initialCommitCreatedAt: Date; //Date of the first commit of the PR
-    lastCommitCreatedAt: Date; //Date of the last commit of the PR
+    initialCommitCreatedAt: Date | null; //Date of the first commit of the PR
+    lastCommitCreatedAt: Date| null; //Date of the last commit of the PR
     titleMaturity: number; //Measures the quality of the title of the PR - uses length of title as a measure
+}
+
+export function createPullRequest(repo:string, prNumber:number,author:string,title:string,createdAt:Date,state:string,mergedAt:Date|null): PullRequest {
+  return {
+    repository: repo,
+    number: prNumber,
+    additions: 0,
+    author: author,
+    codingTime: 0,
+    comments: [],
+    commits: [],
+    createdAt: createdAt,
+    deletions: 0,
+    initialCommitCreatedAt: null,
+    initialCommits: {additions: 0, count: 0, deletions: 0},
+    lastCommitCreatedAt: null,
+    lastProcessed: new Date(),
+    maturity: 0,
+    mergedAt: mergedAt,
+    reworkCommits: {additions: 0, count: 0, deletions: 0},
+    size: 0,
+    state: state,
+    title: title,
+    titleMaturity: 0
+  }
 }
 
 const octokit = new Octokit({auth: process.env.GITHUB_TOKEN});
@@ -57,6 +93,7 @@ export const getRepos = async () => {
     }
     return [];
 };
+
 export const cloneOrUpdateRepo = (repoName: string) => {
     if (!fs.existsSync(REPO_DIR)) {
         console.log(`Creating directory: ${REPO_DIR}`);
@@ -70,20 +107,24 @@ export const cloneOrUpdateRepo = (repoName: string) => {
 
     const repoPath = path.join(REPO_DIR, repoName);
     if (fs.existsSync(repoPath)) {
-        console.log(`Updating repository: ${repoName}`);
+        console.log(`Updating repository: ${repoPath}`);
         execSync(`git -C ${repoPath} pull`);
     } else {
         console.log(`Cloning repository: ${repoName}`);
         execSync(`git clone https://github.com/${ORG_NAME || USER_NAME}/${repoName}.git ${repoPath}`);
     }
 };
-export const getPullRequests = async (repoName: string): Promise<Record<number, PullRequest>> => {
+
+export const getPullRequests = async (repoName: string, startDate:string): Promise<Record<string, PullRequest>> => {
     const prRecords: Record<number, PullRequest> = {};
-    const pullsIterator = await octokit.paginate.iterator(octokit.pulls.list, {
-        owner: ORG_NAME || USER_NAME,
-        repo: repoName,
-        state: 'all',
-        per_page: PAGE_SIZE
+    const pullsIterator = octokit.paginate.iterator(octokit.pulls.list, {
+      owner: ORG_NAME || USER_NAME,
+      repo: repoName,
+      state: 'closed',
+      per_page: PAGE_SIZE,
+      sort: 'created',
+      direction: 'asc',
+      since: startDate
     });
 
     for await (const {data: pulls, headers} of pullsIterator) {
@@ -91,16 +132,7 @@ export const getPullRequests = async (repoName: string): Promise<Record<number, 
         console.log("Rate limit remaining: ", rateLimitRemaining);
         try {
             for (const pull of pulls) {
-                prRecords[pull.number] = {
-                    repository: repoName,
-                    number: pull.number,
-                    author: pull.user?.login || '',
-                    createdAt: pull.created_at,
-                    mergedAt: pull.merged_at || null,
-                    mergeState: pull.merged_at ? 'merged' : 'open',
-                    state: pull.state
-                };
-                console.log(prRecords[pull.number]);
+              prRecords[pull.number] = createPullRequest(repoName, pull.number, pull.user?.login || 'UNKNOWN_AUTHOR', pull.title, new Date(pull.created_at), pull.state, pull.merged_at!=null ? new Date(pull.merged_at) : null);
             }
         } catch (error: any) {
             if (error.response) {
@@ -129,31 +161,40 @@ export const getPullRequests = async (repoName: string): Promise<Record<number, 
 };
 
 export function calculatePrMetrics(pr: PullRequest) {
-    pr.initialCommitsCount = 0;
-    pr.initialCommitAdditions = 0;
-    pr.initialCommitDeletions = 0;
-    pr.reworkCommitsCount = 0;
-    pr.reworkCommitsAdditions = 0;
-    pr.reworkCommitsDeletions = 0;
-    pr.size = 0;
-    for (const commit of pr.commits) {
-        if (commit.date < pr.createdAt) {
-            pr.initialCommitsCount++;
-            pr.initialCommitAdditions += commit.additions;
-            pr.initialCommitDeletions += commit.deletions;
-        } else {
-            pr.reworkCommitsCount++;
-            pr.reworkCommitsAdditions += commit.additions;
-            pr.reworkCommitsDeletions += commit.deletions;
-        }
-        pr.size = pr.size + commit.additions + commit.deletions;
-    }
+  pr.initialCommits = {
+    count: 0,
+    additions: 0,
+    deletions: 0
+  }
+  pr.reworkCommits = {
+    count: 0,
+    additions: 0,
+    deletions: 0
+  }
+  pr.size = 0;
+  for (const commit of pr.commits) {
+      if (commit.date.getTime() < pr.createdAt.getTime()) {
+          pr.initialCommits.count++;
+          pr.initialCommits.additions += commit.additions;
+          pr.initialCommits.deletions += commit.deletions;
+      } else {
+          pr.reworkCommits.count++;
+          pr.reworkCommits.additions += commit.additions;
+          pr.reworkCommits.deletions += commit.deletions;
+      }
+      pr.size = pr.size + commit.additions + commit.deletions;
+  }
+  if (pr.lastCommitCreatedAt && pr.initialCommitCreatedAt) {
     pr.codingTime = Math.round(pr.createdAt < pr.lastCommitCreatedAt ? (new Date(pr.lastCommitCreatedAt).getTime() - new Date(pr.initialCommitCreatedAt).getTime()) / 60000 : (new Date(pr.createdAt).getTime() - new Date(pr.initialCommitCreatedAt).getTime()) / 60000);
-    if (pr.size > 5 && pr.mergeState === 'merged') {
-        pr.maturity = Number(Math.max(0.1, 1 - (pr.reworkCommitsAdditions + pr.reworkCommitsDeletions) / pr.size).toFixed(2));
-        pr.titleMaturity = Number(Math.max(0.1, 1 - (pr.title.length) / Number(PR_TITLE_MATURITY_LENGTH)).toFixed(2));
+    pr.titleMaturity = Number(Math.max(0.1, 1 - (pr.title.length) / Number(PR_TITLE_MATURITY_LENGTH)).toFixed(2)) * 100;
+    if (pr.size > 10) {
+      pr.maturity = Number(Math.max(0.1, 1 - (pr.reworkCommits.additions + pr.reworkCommits.deletions) / pr.size).toFixed(2)) * 100;
+    } else {
+      pr.maturity = 0;
     }
-}
+
+  }
+};
 
 export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullRequest) => {
     const query = `query ($repo: String!, $owner: String!, $prNumber: Int!) {
@@ -249,7 +290,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
     ];
     pr.commits = prData.commits.nodes.map(commit => ({
         author: commit.commit.author?.user?.login,
-        date: commit.commit.committedDate,
+        date: new Date(commit.commit.committedDate),
         additions: commit.commit.additions,
         deletions: commit.commit.deletions,
         title: commit.commit.messageHeadline
