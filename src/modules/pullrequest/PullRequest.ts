@@ -6,16 +6,6 @@ import {execSync} from "child_process";
 import {Octokit} from "@octokit/rest";
 import {REPO_DIR, ORG_NAME, PAGE_SIZE, PR_TITLE_MATURITY_LENGTH, REPO_NAME, USER_NAME} from "../../constants";
 
-interface Pull {
-  repository: string;
-  number: number
-  title: string
-  author: string;
-  createdAt: Date | null;
-  mergedAt: Date | null;
-  state: string;
-}
-
 export interface PullRequest {
     repository: string;
     number: number
@@ -194,7 +184,7 @@ export function calculatePrMetrics(pr: PullRequest) {
     }
 
   }
-};
+}
 
 export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullRequest) => {
     const query = `query ($repo: String!, $owner: String!, $prNumber: Int!) {
