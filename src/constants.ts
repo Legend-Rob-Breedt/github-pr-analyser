@@ -6,13 +6,13 @@ import fs from 'fs';
 dotenv.config({path: process.argv[2] || '../.env'});
 
 export const START_DATE = process.env.START_DATE;
-export const END_DATE = process.env.END_DATE || new Date().toISOString();
 export const OUTPUT_PATH = path.resolve(__dirname, process.env.OUTPUT_PATH || '../../output');
 export const REPO_DIR = path.resolve(OUTPUT_PATH, 'repos');
 export const TIMESTAMP = format(new Date(), 'yyyyMMdd_HHmmss');
-export const PROCESSED_PR_CSV_FILE = `${OUTPUT_PATH}/PR_${TIMESTAMP}.csv`;
-export const WORKING_PR_CSV_FILE = `${OUTPUT_PATH}/PullRequests.csv`;
-export const PROCESSED_AUTHOR_CSV_FILE = `${OUTPUT_PATH}/Authors_${TIMESTAMP}.csv`;
+export const PROCESSED_PR_FOLDER = `${OUTPUT_PATH}/ProcessedPRs`;
+export const WORKING_PR_FOLDER = `${OUTPUT_PATH}/PullRequests`;
+export const PROCESSED_AUTHOR_FOLDER = `${OUTPUT_PATH}/ProcessedAuthors`;
+export const PROCESSED_AUTHOR_CSV_FILE = `${PROCESSED_AUTHOR_FOLDER}/Authors_${TIMESTAMP}.csv`;
 export const WORKING_AUTHOR_CSV_FILE = `${OUTPUT_PATH}/Authors.csv`;
 export const ORG_NAME = process.env.ORG_NAME;
 export const USER_NAME = process.env.USER_NAME;
@@ -25,4 +25,5 @@ try {
     if (!fs.existsSync(REPO_DIR)) fs.mkdirSync(REPO_DIR, {recursive: true});
 } catch (error: any) {
     console.error("Error creating directory: ", error);
+    throw error;
 }
