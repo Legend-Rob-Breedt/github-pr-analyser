@@ -1,6 +1,5 @@
 import {PullRequest} from "../pullrequest/PullRequest";
-import {AuthorStore} from "./Author.store";
-import {COMMENT_MATURITY_LENGTH, PR_TITLE_MATURITY_LENGTH} from "../../constants";
+import {COMMENT_MATURITY_LENGTH} from "../../constants";
 
 export interface Author {
   author: string;
