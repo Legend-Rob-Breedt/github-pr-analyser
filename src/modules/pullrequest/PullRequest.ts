@@ -202,12 +202,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
       createdAt
       commits(first: 100) {
         nodes {
-          commit {
-            author {
-              user {
-                login
-              }
-            }
+          commit {            
             committedDate
             additions
             deletions
@@ -262,7 +257,9 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
         )
     ];
     pr.commits = prData.commits.nodes.map(commit => ({
-        author: commit.commit.author?.user?.login,
+        //Ideally I should be using the author of the commit but it gives back only the email address
+        // and not the username in some instances.
+        author: pr.author,
         date: new Date(commit.commit.committedDate),
         additions: commit.commit.additions,
         deletions: commit.commit.deletions,
