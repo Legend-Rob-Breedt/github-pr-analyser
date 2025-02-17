@@ -13,9 +13,8 @@ export const CSV_HEADERS = [
   { id: 'lastActiveDate', title: 'Last Active Date' },
   { id: 'totalCommits', title: 'Total Commits' },
   { id: 'totalPRs', title: 'Total PRs' },
-  { id: 'totalPRComments', title: 'Total PR Comments' },
+  { id: 'totalPRCommentsGiven', title: 'Total PR Comments Given' },
   { id: 'totalPRReviews', title: 'Total PR Reviews' },
-  { id: 'totalCodeComments', title: 'Total Code Comments' },
   { id: 'prSizeCounts.elite', title: 'PR Size Elite' },
   { id: 'prSizeCounts.good', title: 'PR Size Good' },
   { id: 'prSizeCounts.fair', title: 'PR Size Fair' },
@@ -44,18 +43,18 @@ export const CSV_HEADERS = [
   { id: 'titleMaturityPercentages.good', title: 'Title Maturity % Good' },
   { id: 'titleMaturityPercentages.fair', title: 'Title Maturity % Fair' },
   { id: 'titleMaturityPercentages.needsFocus', title: 'Title Maturity % Needs Focus' },
-  { id: 'titleCounts.elite', title: 'Title Counts Elite' },
-  { id: 'titleCounts.good', title: 'Title Counts Good' },
-  { id: 'titleCounts.fair', title: 'Title Counts Fair' },
-  { id: 'titleCounts.needsFocus', title: 'Title Counts Needs Focus' },
-  { id: 'commentsPercentages.elite', title: 'Comments % Elite' },
-  { id: 'commentsPercentages.good', title: 'Comments % Good' },
-  { id: 'commentsPercentages.fair', title: 'Comments % Fair' },
-  { id: 'commentsPercentages.needsFocus', title: 'Comments % Needs Focus' },
-  { id: 'commentsCounts.elite', title: 'Comments Counts Elite' },
-  { id: 'commentsCounts.good', title: 'Comments Counts Good' },
-  { id: 'commentsCounts.fair', title: 'Comments Counts Fair' },
-  { id: 'commentsCounts.needsFocus', title: 'Comments Counts Needs Focus' }
+  { id: 'titleMaturityCounts.elite', title: 'Title Counts Elite' },
+  { id: 'titleMaturityCounts.good', title: 'Title Counts Good' },
+  { id: 'titleMaturityCounts.fair', title: 'Title Counts Fair' },
+  { id: 'titleMaturityCounts.needsFocus', title: 'Title Counts Needs Focus' },
+  { id: 'prCommentGivenMaturityPercentages.elite', title: 'Comments % Elite' },
+  { id: 'prCommentGivenMaturityPercentages.good', title: 'Comments % Good' },
+  { id: 'prCommentGivenMaturityPercentages.fair', title: 'Comments % Fair' },
+  { id: 'prCommentGivenMaturityPercentages.needsFocus', title: 'Comments % Needs Focus' },
+  { id: 'prCommentGivenMaturityCounts.elite', title: 'Comments Counts Elite' },
+  { id: 'prCommentGivenMaturityCounts.good', title: 'Comments Counts Good' },
+  { id: 'prCommentGivenMaturityCounts.fair', title: 'Comments Counts Fair' },
+  { id: 'prCommentGivenMaturityCounts.needsFocus', title: 'Comments Counts Needs Focus' }
 ];
 
 export class AuthorStore {
@@ -81,9 +80,8 @@ export class AuthorStore {
             if (row.lastActiveDate) author.lastActiveDate = new Date(row.lastActiveDate);
             if (row.totalCommits) author.totalCommits = parseInt(row.totalCommits, 10);
             if (row.totalPRs) author.totalPRs = parseInt(row.totalPRs, 10);
-            if (row.totalPRComments) author.totalPRComments = parseInt(row.totalPRComments, 10);
+            if (row.totalPRCommentsGiven) author.totalPRCommentsGiven = parseInt(row.totalPRCommentsGiven, 10);
             if (row.totalPRReviews) author.totalPRReviews = parseInt(row.totalPRReviews, 10);
-            if (row.totalCodeComments) author.totalCodeComments = parseInt(row.totalCodeComments, 10);
 
             if (row['prSizeCounts.elite']) author.prSizeCounts.elite = parseInt(row['prSizeCounts.elite'], 10);
             if (row['prSizeCounts.good']) author.prSizeCounts.good = parseInt(row['prSizeCounts.good'], 10);
@@ -120,20 +118,20 @@ export class AuthorStore {
             if (row['titleMaturityPercentages.fair']) author.titleMaturityPercentages.fair = parseInt(row['titleMaturityPercentages.fair'], 10);
             if (row['titleMaturityPercentages.needsFocus']) author.titleMaturityPercentages.needsFocus = parseInt(row['titleMaturityPercentages.needsFocus'], 10);
 
-            if (row['titleCounts.elite']) author.titleCounts.elite = parseInt(row['titleCounts.elite'], 10);
-            if (row['titleCounts.good']) author.titleCounts.good = parseInt(row['titleCounts.good'], 10);
-            if (row['titleCounts.fair']) author.titleCounts.fair = parseInt(row['titleCounts.fair'], 10);
-            if (row['titleCounts.needsFocus']) author.titleCounts.needsFocus = parseInt(row['titleCounts.needsFocus'], 10);
+            if (row['titleMaturityCounts.elite']) author.titleMaturityCounts.elite = parseInt(row['titleMaturityCounts.elite'], 10);
+            if (row['titleMaturityCounts.good']) author.titleMaturityCounts.good = parseInt(row['titleMaturityCounts.good'], 10);
+            if (row['titleMaturityCounts.fair']) author.titleMaturityCounts.fair = parseInt(row['titleMaturityCounts.fair'], 10);
+            if (row['titleMaturityCounts.needsFocus']) author.titleMaturityCounts.needsFocus = parseInt(row['titleMaturityCounts.needsFocus'], 10);
 
-            if (row['commentsPercentages.elite']) author.commentsPercentages.elite = parseInt(row['commentsPercentages.elite'], 10);
-            if (row['commentsPercentages.good']) author.commentsPercentages.good = parseInt(row['commentsPercentages.good'], 10);
-            if (row['commentsPercentages.fair']) author.commentsPercentages.fair = parseInt(row['commentsPercentages.fair'], 10);
-            if (row['commentsPercentages.needsFocus']) author.commentsPercentages.needsFocus = parseInt(row['commentsPercentages.needsFocus'], 10);
+            if (row['prCommentGivenMaturityPercentages.elite']) author.prCommentGivenMaturityPercentages.elite = parseInt(row['prCommentGivenMaturityPercentages.elite'], 10);
+            if (row['prCommentGivenMaturityPercentages.good']) author.prCommentGivenMaturityPercentages.good = parseInt(row['prCommentGivenMaturityPercentages.good'], 10);
+            if (row['prCommentGivenMaturityPercentages.fair']) author.prCommentGivenMaturityPercentages.fair = parseInt(row['prCommentGivenMaturityPercentages.fair'], 10);
+            if (row['prCommentGivenMaturityPercentages.needsFocus']) author.prCommentGivenMaturityPercentages.needsFocus = parseInt(row['prCommentGivenMaturityPercentages.needsFocus'], 10);
 
-            if (row['commentsCounts.elite']) author.commentsPercentages.elite = parseInt(row['commentsCounts.elite'], 10);
-            if (row['commentsCounts.good']) author.commentsPercentages.good = parseInt(row['commentsCounts.good'], 10);
-            if (row['commentsCounts.fair']) author.commentsPercentages.fair = parseInt(row['commentsCounts.fair'], 10);
-            if (row['commentsCounts.needsFocus']) author.commentsPercentages.needsFocus = parseInt(row['commentsCounts.needsFocus'], 10);
+            if (row['prCommentGivenMaturityCounts.elite']) author.prCommentGivenMaturityPercentages.elite = parseInt(row['prCommentGivenMaturityCounts.elite'], 10);
+            if (row['prCommentGivenMaturityCounts.good']) author.prCommentGivenMaturityPercentages.good = parseInt(row['prCommentGivenMaturityCounts.good'], 10);
+            if (row['prCommentGivenMaturityCounts.fair']) author.prCommentGivenMaturityPercentages.fair = parseInt(row['prCommentGivenMaturityCounts.fair'], 10);
+            if (row['prCommentGivenMaturityCounts.needsFocus']) author.prCommentGivenMaturityPercentages.needsFocus = parseInt(row['prCommentGivenMaturityCounts.needsFocus'], 10);
             authors[row.author] = author;
           }
         })
@@ -156,9 +154,8 @@ export class AuthorStore {
         lastActiveDate: author.lastActiveDate?.toISOString(),
         totalCommits: author.totalCommits,
         totalPRs: author.totalPRs,
-        totalPRComments: author.totalPRComments,
+        totalPRCommentsGiven: author.totalPRCommentsGiven,
         totalPRReviews: author.totalPRReviews,
-        totalCodeComments: author.totalCodeComments,
         'prSizeCounts.elite': author.prSizeCounts.elite,
         'prSizeCounts.good': author.prSizeCounts.good,
         'prSizeCounts.fair': author.prSizeCounts.fair,
@@ -187,18 +184,18 @@ export class AuthorStore {
         'titleMaturityPercentages.good': author.titleMaturityPercentages.good,
         'titleMaturityPercentages.fair': author.titleMaturityPercentages.fair,
         'titleMaturityPercentages.needsFocus': author.titleMaturityPercentages.needsFocus,
-        'titleCounts.elite': author.titleCounts.elite,
-        'titleCounts.good': author.titleCounts.good,
-        'titleCounts.fair': author.titleCounts.fair,
-        'titleCounts.needsFocus': author.titleCounts.needsFocus,
-        'commentsPercentages.elite': author.commentsPercentages.elite,
-        'commentsPercentages.good': author.commentsPercentages.good,
-        'commentsPercentages.fair': author.commentsPercentages.fair,
-        'commentsPercentages.needsFocus': author.commentsPercentages.needsFocus,
-        'commentsCounts.elite': author.commentsCounts.elite,
-        'commentsCounts.good': author.commentsCounts.good,
-        'commentsCounts.fair': author.commentsCounts.fair,
-        'commentsCounts.needsFocus': author.commentsCounts.needsFocus
+        'titleMaturityCounts.elite': author.titleMaturityCounts.elite,
+        'titleMaturityCounts.good': author.titleMaturityCounts.good,
+        'titleMaturityCounts.fair': author.titleMaturityCounts.fair,
+        'titleMaturityCounts.needsFocus': author.titleMaturityCounts.needsFocus,
+        'prCommentGivenMaturityPercentages.elite': author.prCommentGivenMaturityPercentages.elite,
+        'prCommentGivenMaturityPercentages.good': author.prCommentGivenMaturityPercentages.good,
+        'prCommentGivenMaturityPercentages.fair': author.prCommentGivenMaturityPercentages.fair,
+        'prCommentGivenMaturityPercentages.needsFocus': author.prCommentGivenMaturityPercentages.needsFocus,
+        'prCommentGivenMaturityCounts.elite': author.prCommentGivenMaturityCounts.elite,
+        'prCommentGivenMaturityCounts.good': author.prCommentGivenMaturityCounts.good,
+        'prCommentGivenMaturityCounts.fair': author.prCommentGivenMaturityCounts.fair,
+        'prCommentGivenMaturityCounts.needsFocus': author.prCommentGivenMaturityCounts.needsFocus
       });
     }
 

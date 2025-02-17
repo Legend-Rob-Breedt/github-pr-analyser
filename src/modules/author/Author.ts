@@ -1,4 +1,5 @@
 import {PullRequest} from "../pullrequest/PullRequest";
+import {COMMENT_MATURITY_LENGTH} from "../../constants";
 
 export interface Author {
   author: string;
@@ -6,8 +7,7 @@ export interface Author {
   lastActiveDate: Date | null;
   totalCommits: number;
   totalPRs: number;
-  totalCodeComments: number;
-  totalPRComments: number;
+  totalPRCommentsGiven: number;
   totalPRReviews: number;
 
   //METRICS ARE ONLY INCLUDED FOR MERGED PULL REQUESTS
@@ -15,13 +15,15 @@ export interface Author {
   //Percentages are effectively the counts of each bucket divided by the total count of all of them.
   codingTimeCounts: { elite: number; good: number; fair: number; needsFocus: number }; //Elite < 1 hour, Good <4 hours, Fair <23 hours, NeedFocus >23 hours
   codingTimePercentages: { elite: number; good: number; fair: number; needsFocus: number };
-  commentsCounts: { elite: number; good: number; fair: number; needsFocus: number };
-  commentsPercentages: { elite: number; good: number; fair: number; needsFocus: number };
+  prCommitCommentMaturityCount: { elite: number; good: number; fair: number; needsFocus: number }; //Strength of an Authors commit comments
+  prCommitCommentMaturityPercentages: { elite: number; good: number; fair: number; needsFocus: number };
+  prCommentGivenMaturityCounts: { elite: number; good: number; fair: number; needsFocus: number }; //Strength of PR Commenters comments given on PRs.
+  prCommentGivenMaturityPercentages: { elite: number; good: number; fair: number; needsFocus: number };
   prSizeCounts: { elite: number; good: number; fair: number; needsFocus: number }; //Number of PRs that PR Size lines of code:Elite <85 Good <138 -> Fair <209 ->NeedsFocus
   prSizePercentages: { elite: number; good: number; fair: number; needsFocus: number };
   prMaturityCounts: { elite: number; good: number; fair: number; needsFocus: number }; //Elite > 91%, Good > 84$, Fair >= 77%, NeedFocus < 77%
   prMaturityPercentages: { elite: number; good: number; fair: number; needsFocus: number };
-  titleCounts: { elite: number; good: number; fair: number; needsFocus: number };
+  titleMaturityCounts: { elite: number; good: number; fair: number; needsFocus: number };
   titleMaturityPercentages: { elite: number; good: number; fair: number; needsFocus: number };
 
 }
@@ -33,74 +35,85 @@ export function createAuthor(authorName: string): Author {
     lastActiveDate: null,
     totalCommits: 0,
     totalPRs: 0,
-    totalPRComments: 0,
+    totalPRCommentsGiven: 0,
     totalPRReviews: 0,
-    totalCodeComments: 0,
 
     prSizeCounts: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
     prSizePercentages: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
     prMaturityCounts: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
     prMaturityPercentages: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
     codingTimeCounts: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
     codingTimePercentages: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
     titleMaturityPercentages: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
-    commentsPercentages: {
+    prCommentGivenMaturityPercentages: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
-    titleCounts: {
+    titleMaturityCounts: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
-    commentsCounts: {
+    prCommentGivenMaturityCounts: {
       elite: 0,
       good: 0,
       fair: 0,
-      needsFocus: 0,
+      needsFocus: 0
     },
+    prCommitCommentMaturityCount: {
+      elite: 0,
+      good: 0,
+      fair: 0,
+      needsFocus: 0
+    },
+    prCommitCommentMaturityPercentages: {
+      elite: 0,
+      good: 0,
+      fair: 0,
+      needsFocus: 0
+    }
   };
 }
 
-function updateAuthorPRMetrics(metricCounts: any, metricPercentages: any, value: number, thresholds: number[]) {
+function updateAuthorBucketMetrics(metricCounts: any, metricPercentages: any, value: number, thresholds: number[]) {
   if (value < thresholds[0]) metricCounts.elite++;
   else if (value < thresholds[1]) metricCounts.good++;
   else if (value < thresholds[2]) metricCounts.fair++;
@@ -130,26 +143,47 @@ export function calculateAuthorMetrics(pr: PullRequest, authorRecords: Record<st
   } else {
     author.lastActiveDate = pr.initialCommitCreatedAt;
   }
-  author.totalCommits += pr.commits.length;
 
   if (pr.mergedAt!=null) {
     /*Don't add metrics for PRs that are not merged. This is because likelihood is that a new PR will be raised at a
      later date with the same commits. This will skew the metrics as the same commits will be counted twice.*/
-    updateAuthorPRMetrics(author.codingTimeCounts, author.codingTimePercentages, pr.codingTime, [30, 150, 1440]);
-    updateAuthorPRMetrics(author.prSizeCounts, author.prSizePercentages, pr.size, [98, 148, 218]);
-    if (pr.maturity>0) updateAuthorPRMetrics(author.prMaturityCounts, author.prMaturityPercentages, pr.maturity, [91, 84, 77]);
-    updateAuthorPRMetrics(author.titleCounts, author.titleMaturityPercentages, pr.titleMaturity, [100, 75, 50]);
+    updateAuthorBucketMetrics(author.codingTimeCounts, author.codingTimePercentages, pr.codingTime, [30, 150, 1440]);
+    updateAuthorBucketMetrics(author.prSizeCounts, author.prSizePercentages, pr.size, [98, 148, 218]);
+    if (pr.maturity>0) updateAuthorBucketMetrics(author.prMaturityCounts, author.prMaturityPercentages, pr.maturity, [91, 84, 77]);
+    updateAuthorBucketMetrics(author.titleMaturityCounts, author.titleMaturityPercentages, pr.titleMaturity, [100, 75, 50]);
+
+    for (const commit of pr.commits) {
+      if (commit.author == pr.author) {
+        updateAuthorBucketMetrics(author.prCommitCommentMaturityCount, author.prCommitCommentMaturityPercentages, calculateCommentTitleMaturity(commit.title), [100, 75, 50]);
+        author.totalCommits++;
+      }
+    }
   }
+
   if (!authorRecords[pr.author]) authorRecords[pr.author] = author;
   console.log("Updated Author Metrics:", author);
+  calculateAuthorCommentMetrics(pr, authorRecords);
 }
 
-/*
-export function calculateAuthorCommentMetrics(pr: PullRequest, authorRecords: Record<string, Author>) {
+function calculateAuthorCommentMetrics(pr: PullRequest, authorRecords: Record<string, Author>) {
+  let commentAuthors: Record<string, Author> = {};
   for (const comment of pr.comments) {
-    if (authorRecords[comment.author]!) authorRecords[comment.author] = createAuthor(comment.author);
-    authorRecords[comment.author].totalPRReviews
-    //if (comment.type="review")
+    if (comment.author != pr.author) {
+      if (authorRecords[comment.author]==null) authorRecords[comment.author] = createAuthor(comment.author);
+      authorRecords[comment.author].totalPRCommentsGiven++;
+      updateAuthorBucketMetrics(authorRecords[comment.author].prCommentGivenMaturityCounts,
+          authorRecords[comment.author].prCommentGivenMaturityPercentages, calculateCommentTitleMaturity(comment.body), [100, 75, 50]);
+      commentAuthors[comment.author] = authorRecords[comment.author];
+    }
+  }
+  for (const commentAuthor in commentAuthors) {
+    authorRecords[commentAuthor].totalPRReviews++
   }
 }
-*/
+
+function calculateCommentTitleMaturity(comment: string) {
+  return Number(Math.max(0.1, 1 - (comment.length) / Number(COMMENT_MATURITY_LENGTH)).toFixed(2)) * 100;
+}
+
+
+

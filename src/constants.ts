@@ -17,7 +17,7 @@ export const WORKING_AUTHOR_CSV_FILE = `${OUTPUT_PATH}/Authors.csv`;
 export const ORG_NAME = process.env.ORG_NAME;
 export const USER_NAME = process.env.USER_NAME;
 export const PAGE_SIZE = process.env.PAGE_SIZE || 100;
-export const PR_TITLE_MATURITY_LENGTH = process.env.PR_TITLE_MATURITY_LENGTH || 40;
+export const PR_TITLE_MATURITY_LENGTH = process.env.PR_TITLE_MATURITY_LENGTH || 80;
 export const COMMENT_MATURITY_LENGTH = process.env.COMMENT_MATURITY_LENGTH || 40;
 export const REPO_NAME = process.env.REPO_NAME;
 

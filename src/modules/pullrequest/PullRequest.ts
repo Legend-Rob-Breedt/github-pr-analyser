@@ -193,6 +193,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
       __typename
       id
       title
+      body
       author {
         login
       }
@@ -201,12 +202,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
       createdAt
       commits(first: 100) {
         nodes {
-          commit {
-            author {
-              user {
-                login
-              }
-            }
+          commit {            
             committedDate
             additions
             deletions
@@ -223,17 +219,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
           }
           body
         }
-      }
-      reviews(first: 100) {
-        nodes {
-          __typename
-          author {
-            login
-          }
-          createdAt
-          body
-        }
-      }
+      }      
       reviewThreads(first: 100) {
         nodes {
           comments(first: 100) {
@@ -258,20 +244,12 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
 
     pr.comments = [
         ...prData.comments.nodes.map(comment => ({
-            type: 'issue',
             author: comment.author?.login,
             date: comment.createdAt,
             body: comment.body
         })),
-        ...prData.reviews.nodes.map(review => ({
-            type: 'review',
-            author: review.author?.login,
-            date: review.createdAt,
-            body: review.body
-        })),
         ...prData.reviewThreads.nodes.flatMap(reviewThread =>
             reviewThread.comments.nodes.map(comment => ({
-                type: 'code-comment',
                 author: comment.author?.login,
                 date: comment.createdAt,
                 body: comment.body
@@ -279,7 +257,9 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
         )
     ];
     pr.commits = prData.commits.nodes.map(commit => ({
-        author: commit.commit.author?.user?.login,
+        //Ideally I should be using the author of the commit but it gives back only the email address
+        // and not the username in some instances.
+        author: pr.author,
         date: new Date(commit.commit.committedDate),
         additions: commit.commit.additions,
         deletions: commit.commit.deletions,
@@ -289,7 +269,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
     pr.initialCommitCreatedAt = pr.commits[0].date;
     pr.lastCommitCreatedAt = pr.commits[pr.commits.length - 1].date;
 
-    pr.title = prData.title;
+    pr.title = prData.title + prData.body;
     pr.additions = prData.additions;
     pr.deletions = prData.deletions;
 
