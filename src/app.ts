@@ -25,7 +25,6 @@ const main = async () => {
     const workingRecords = await prStore.loadHistoricalPullRequest();
     cloneOrUpdateRepo(repo.name);
     const prRecords = await getPullRequests(repo.name, START_DATE);
-
     //Process new PR if created > last process PR created date OR where PR.last processed greater then last record process date
     //this is to handle PRs that were created before the last PR record was processed but were merged after the last PR record that was processed
     for (const prNumber in prRecords) {

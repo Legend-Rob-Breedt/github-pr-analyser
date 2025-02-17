@@ -193,6 +193,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
       __typename
       id
       title
+      body
       author {
         login
       }
@@ -223,17 +224,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
           }
           body
         }
-      }
-      reviews(first: 100) {
-        nodes {
-          __typename
-          author {
-            login
-          }
-          createdAt
-          body
-        }
-      }
+      }      
       reviewThreads(first: 100) {
         nodes {
           comments(first: 100) {
@@ -258,20 +249,12 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
 
     pr.comments = [
         ...prData.comments.nodes.map(comment => ({
-            type: 'issue',
             author: comment.author?.login,
             date: comment.createdAt,
             body: comment.body
         })),
-        ...prData.reviews.nodes.map(review => ({
-            type: 'review',
-            author: review.author?.login,
-            date: review.createdAt,
-            body: review.body
-        })),
         ...prData.reviewThreads.nodes.flatMap(reviewThread =>
             reviewThread.comments.nodes.map(comment => ({
-                type: 'code-comment',
                 author: comment.author?.login,
                 date: comment.createdAt,
                 body: comment.body
@@ -289,7 +272,7 @@ export const getCommentsAndCommitsForPR = async (repoName: string, pr: PullReque
     pr.initialCommitCreatedAt = pr.commits[0].date;
     pr.lastCommitCreatedAt = pr.commits[pr.commits.length - 1].date;
 
-    pr.title = prData.title;
+    pr.title = prData.title + prData.body;
     pr.additions = prData.additions;
     pr.deletions = prData.deletions;
 
