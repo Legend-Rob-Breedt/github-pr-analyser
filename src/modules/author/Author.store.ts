@@ -383,6 +383,6 @@ export class AuthorStore {
     }
 
     await csvWriter.writeRecords(csvRecords);
-    fs.copyFileSync(WORKING_AUTHOR_CSV_FILE,PROCESSED_AUTHOR_CSV_FILE);
+    fs.copyFileSync(WORKING_AUTHOR_CSV_FILE, PROCESSED_AUTHOR_CSV_FILE);
   };
 }
