@@ -12,7 +12,7 @@ export const CSV_HEADERS = [
   {id: 'author', title: 'Author'},
   {id: 'firstActiveDate', title: 'First Active Date'},
   {id: 'lastActiveDate', title: 'Last Active Date'},
-  {id: 'totalCommits', title: 'Total Commits'},
+  {id: 'totalCommits', title: 'Total PR Commits'},
   {id: 'totalPRs', title: 'Total PRs'},
   {id: 'totalPRCommentsGiven', title: 'Total PR Comments Given'},
   {id: 'totalPRReviews', title: 'Total PR Reviews'},
@@ -32,35 +32,49 @@ export const CSV_HEADERS = [
   {id: 'prMaturityPercentages.good', title: 'PR Maturity % Good'},
   {id: 'prMaturityPercentages.fair', title: 'PR Maturity % Fair'},
   {id: 'prMaturityPercentages.needsFocus', title: 'PR Maturity % Needs Focus'},
-  {id: 'codingTimeCounts.elite', title: 'Coding Time Elite'},
-  {id: 'codingTimeCounts.good', title: 'Coding Time Good'},
-  {id: 'codingTimeCounts.fair', title: 'Coding Time Fair'},
-  {id: 'codingTimeCounts.needsFocus', title: 'Coding Time Needs Focus'},
-  {id: 'codingTimePercentages.elite', title: 'Coding Time % Elite'},
-  {id: 'codingTimePercentages.good', title: 'Coding Time % Good'},
-  {id: 'codingTimePercentages.fair', title: 'Coding Time % Fair'},
-  {id: 'codingTimePercentages.needsFocus', title: 'Coding Time % Needs Focus'},
-  {id: 'titleMaturityPercentages.elite', title: 'Title Maturity % Elite'},
-  {id: 'titleMaturityPercentages.good', title: 'Title Maturity % Good'},
-  {id: 'titleMaturityPercentages.fair', title: 'Title Maturity % Fair'},
+  {id: 'codingTimeCounts.elite', title: 'PR Coding Time Elite'},
+  {id: 'codingTimeCounts.good', title: 'PR Coding Time Good'},
+  {id: 'codingTimeCounts.fair', title: 'PR Coding Time Fair'},
+  {id: 'codingTimeCounts.needsFocus', title: 'PR Coding Time Needs Focus'},
+  {id: 'codingTimePercentages.elite', title: 'PR Coding Time % Elite'},
+  {id: 'codingTimePercentages.good', title: 'PR Coding Time % Good'},
+  {id: 'codingTimePercentages.fair', title: 'PR Coding Time % Fair'},
+  {id: 'codingTimePercentages.needsFocus', title: 'PR Coding Time % Needs Focus'},
+  {id: 'titleMaturityPercentages.elite', title: 'PR Title Maturity % Elite'},
+  {id: 'titleMaturityPercentages.good', title: 'PR Title Maturity % Good'},
+  {id: 'titleMaturityPercentages.fair', title: 'PR Title Maturity % Fair'},
   {
     id: 'titleMaturityPercentages.needsFocus',
-    title: 'Title Maturity % Needs Focus',
+    title: 'PR Title Maturity % Needs Focus',
   },
-  {id: 'titleMaturityCounts.elite', title: 'Title Counts Elite'},
-  {id: 'titleMaturityCounts.good', title: 'Title Counts Good'},
-  {id: 'titleMaturityCounts.fair', title: 'Title Counts Fair'},
-  {id: 'titleMaturityCounts.needsFocus', title: 'Title Counts Needs Focus'},
-  {id: 'prCommentGivenMaturityPercentages.elite', title: 'Comments % Elite'},
-  {id: 'prCommentGivenMaturityPercentages.good', title: 'Comments % Good'},
-  {id: 'prCommentGivenMaturityPercentages.fair', title: 'Comments % Fair'},
+  {id: 'titleMaturityCounts.elite', title: 'PR Title Counts Elite'},
+  {id: 'titleMaturityCounts.good', title: 'PR Title Counts Good'},
+  {id: 'titleMaturityCounts.fair', title: 'PR Title Counts Fair'},
+  {id: 'titleMaturityCounts.needsFocus', title: 'PR Title Counts Needs Focus'},
+  {id: 'prCommitCommentMaturityCount.elite', title: 'PR Commit Comment Elite'},
+  {id: 'prCommitCommentMaturityCount.good', title: 'PR Commit Comment Good'},
+  {id: 'prCommitCommentMaturityCount.fair', title: 'PR Commit Comment Fair'},
+  {
+    id: 'prCommitCommentMaturityCount.needsFocus',
+    title: 'PR Commit Comment Needs Focus',
+  },
+  {id: 'prCommitCommentMaturityPercentages.elite', title: 'PR Commit Comment % Elite'},
+  {id: 'prCommitCommentMaturityPercentages.good', title: 'PR Commit Comment % Good'},
+  {id: 'prCommitCommentMaturityPercentages.fair', title: 'PR Commit Comment % Fair'},
+  {
+    id: 'prCommitCommentMaturityPercentages.needsFocus',
+    title: 'PR Commit Comment % Needs Focus',
+  },
+  {id: 'prCommentGivenMaturityPercentages.elite', title: 'PR Comments Given % Elite'},
+  {id: 'prCommentGivenMaturityPercentages.good', title: 'PR Comments Given % Good'},
+  {id: 'prCommentGivenMaturityPercentages.fair', title: 'PR Comments Given % Fair'},
   {
     id: 'prCommentGivenMaturityPercentages.needsFocus',
     title: 'Comments % Needs Focus',
   },
-  {id: 'prCommentGivenMaturityCounts.elite', title: 'Comments Counts Elite'},
-  {id: 'prCommentGivenMaturityCounts.good', title: 'Comments Counts Good'},
-  {id: 'prCommentGivenMaturityCounts.fair', title: 'Comments Counts Fair'},
+  {id: 'prCommentGivenMaturityCounts.elite', title: 'PR Comments Given Counts Elite'},
+  {id: 'prCommentGivenMaturityCounts.good', title: 'PR Comments Given Counts Good'},
+  {id: 'prCommentGivenMaturityCounts.fair', title: 'PR Comments Given Counts Fair'},
   {
     id: 'prCommentGivenMaturityCounts.needsFocus',
     title: 'Comments Counts Needs Focus',
@@ -304,6 +318,40 @@ export class AuthorStore {
                 row['prCommentGivenMaturityCounts.needsFocus'],
                 10,
               );
+
+            author.prCommitCommentMaturityCount.elite = parseInt(
+              row['prCommitCommentMaturityCount.elite'],
+              10
+            );
+            author.prCommitCommentMaturityCount.good = parseInt(
+              row['prCommitCommentMaturityCount.good'],
+              10,
+            );
+            author.prCommitCommentMaturityCount.fair = parseInt(
+              row['prCommitCommentMaturityCount.fair'],
+              10,
+            );
+            author.prCommitCommentMaturityCount.needsFocus = parseInt(
+              row['prCommitCommentMaturityCount.needsFocus'],
+              10,
+            );
+            author.prCommitCommentMaturityPercentages.elite = parseInt(
+              row['prCommitCommentMaturityPercentages.elite'],
+              10,
+            );
+            author.prCommitCommentMaturityPercentages.good = parseInt(
+              row['prCommitCommentMaturityPercentages.good'],
+              10,
+            );
+            author.prCommitCommentMaturityPercentages.fair = parseInt(
+              row['prCommitCommentMaturityPercentages.fair'],
+              10,
+            );
+            author.prCommitCommentMaturityPercentages.needsFocus = parseInt(
+              row['prCommitCommentMaturityPercentages.needsFocus'],
+              10,
+            );
+
             authors[row.author] = author;
           }
         })
@@ -379,6 +427,22 @@ export class AuthorStore {
           author.prCommentGivenMaturityCounts.fair,
         'prCommentGivenMaturityCounts.needsFocus':
           author.prCommentGivenMaturityCounts.needsFocus,
+        'prCommitCommentMaturityCount.elite':
+          author.prCommitCommentMaturityCount.elite,
+        'prCommitCommentMaturityCount.good':
+          author.prCommitCommentMaturityCount.good,
+        'prCommitCommentMaturityCount.fair':
+          author.prCommitCommentMaturityCount.fair,
+        'prCommitCommentMaturityCount.needsFocus':
+          author.prCommitCommentMaturityCount.needsFocus,
+        'prCommitCommentMaturityPercentages.elite':
+          author.prCommitCommentMaturityPercentages.elite,
+        'prCommitCommentMaturityPercentages.good':
+          author.prCommitCommentMaturityPercentages.good,
+        'prCommitCommentMaturityPercentages.fair':
+          author.prCommitCommentMaturityPercentages.fair,
+        'prCommitCommentMaturityPercentages.needsFocus':
+          author.prCommitCommentMaturityPercentages.needsFocus
       });
     }
 
