@@ -12,6 +12,7 @@ import {
   REPO_NAME,
   USER_NAME,
 } from '../../constants';
+import { MetricBuckets } from "../metricbuckets/MetricBuckets.types";
 
 export interface PullRequest {
   repository: string;
@@ -149,7 +150,6 @@ export const getPullRequests = async (
       per_page: PAGE_SIZE,
       sort: 'created',
       direction: 'asc',
-      since: startDate,
     });
 
     for await (const {data: pulls, headers} of pullsIterator) {
@@ -160,15 +160,17 @@ export const getPullRequests = async (
       console.log('Rate limit remaining: ', rateLimitRemaining);
       try {
         for (const pull of pulls) {
-          prRecords[pull.number] = createPullRequest(
-            repoName,
-            pull.number,
-            pull.user?.login || 'UNKNOWN_AUTHOR',
-            pull.title,
-            new Date(pull.created_at),
-            pull.state,
-            pull.merged_at !== null ? new Date(pull.merged_at) : null,
-          );
+          if (new Date(pull.created_at) > new Date(startDate)) {
+            prRecords[pull.number] = createPullRequest(
+              repoName,
+              pull.number,
+              pull.user?.login || 'UNKNOWN_AUTHOR',
+              pull.title,
+              new Date(pull.created_at),
+              pull.state,
+              pull.merged_at !== null ? new Date(pull.merged_at) : null,
+            );
+          }
         }
       } catch (error: any) {
         if (error.response) {
@@ -252,15 +254,7 @@ export function calculatePrMetrics(pr: PullRequest) {
             new Date(pr.initialCommitCreatedAt).getTime()) /
             60000,
     );
-    pr.titleMaturity =
-      Number(
-        Math.max(
-          0.1,
-          1 -
-            (pr.title.length + pr.body.length) /
-              Number(PR_TITLE_MATURITY_LENGTH),
-        ).toFixed(2),
-      ) * 100;
+    pr.titleMaturity = MetricBuckets.calculateCommentTitleMaturity(pr.title + pr.body.length,PR_TITLE_MATURITY_LENGTH)
     if (pr.size > 10) {
       pr.maturity =
         Number(
