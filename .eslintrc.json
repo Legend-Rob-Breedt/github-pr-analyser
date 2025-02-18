@@ -1,3 +1,10 @@
 {
-  "extends": "./node_modules/gts/"
+  "root": true,
+  "extends": ["eslint:recommended", "prettier"],
+  "ignorePatterns": ["**/node_modules/**", "**/dist/**"],
+  "settings": {
+    "next": {
+      "rootDir": ["apps/*/"]
+    }
+  }
 }

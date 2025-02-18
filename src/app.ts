@@ -7,10 +7,7 @@ import {
   PullRequest,
 } from './modules/pullrequest/PullRequest';
 
-import {
-  PAGE_SIZE,
-  START_DATE,
-} from './constants';
+import {PAGE_SIZE, START_DATE} from './constants';
 import {PullRequestStore} from './modules/pullrequest/PullRequest.store';
 import {AuthorStore} from './modules/author/Author.store';
 import {calculateAuthorMetrics} from './modules/author/Author';
@@ -34,7 +31,6 @@ const main = async () => {
     //this is to handle PRs that were created before the last PR record was processed but were merged after the last PR record that was processed
 
     let processedPrs: PullRequest[] = [];
-    console.log('Processing PRs: ', prRecords['1240']);
     for (const prNumber in prRecords) {
       console.info('Processing PR: ', prNumber);
       if (workingRecords[prNumber]) {

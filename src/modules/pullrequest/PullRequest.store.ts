@@ -1,8 +1,6 @@
 import {
-  PROCESSED_AUTHOR_CSV_FILE,
   PROCESSED_PR_FOLDER,
   TIMESTAMP,
-  WORKING_AUTHOR_CSV_FILE,
   WORKING_PR_FOLDER,
 } from '../../constants';
 import * as fs from 'fs';
@@ -60,59 +58,65 @@ export class PullRequestStore {
     return new Promise((resolve, reject) => {
       const historicalRecords: Record<string, PullRequest> = {};
       //console.log("Retrieving historical repository data from: ", this.workingPrCsvFile, this.repo);
+      try {
+        if (fs.existsSync(this.workingPrCsvFile)) {
+          fs.createReadStream(this.workingPrCsvFile)
+            .pipe(csvParser({ headers: CSV_HEADERS.map(h => h.id), skipLines: 1 }))
+            .on('data', row => {
+              if (row.repository === this.repo) {
+                historicalRecords[row.number] = createPullRequest(
+                  row.repository,
+                  row.number,
+                  row.author,
+                  row.title,
+                  new Date(row.createdAt),
+                  row.state,
+                  row.mergedAt === '' ? null : new Date(row.mergedAt),
+                );
+                historicalRecords[row.number].valid = row.valid;
+                historicalRecords[row.number].additions = row.additions;
+                historicalRecords[row.number].deletions = row.deletions;
+                historicalRecords[row.number].changedFiles = row.changedFiles;
+                historicalRecords[row.number].size = row.size;
 
-      if (fs.existsSync(this.workingPrCsvFile)) {
-        fs.createReadStream(this.workingPrCsvFile)
-          .pipe(csvParser({headers: CSV_HEADERS.map(h => h.id), skipLines: 1}))
-          .on('data', row => {
-            if (row.repository === this.repo) {
-              historicalRecords[row.number] = createPullRequest(
-                row.repository,
-                row.number,
-                row.author,
-                row.title,
-                new Date(row.createdAt),
-                row.state,
-                row.mergedAt === '' ? null : new Date(row.mergedAt),
-              );
-              historicalRecords[row.number].valid = row.valid;
-              historicalRecords[row.number].additions = row.additions;
-              historicalRecords[row.number].deletions = row.deletions;
-              historicalRecords[row.number].changedFiles = row.changedFiles;
-              historicalRecords[row.number].size = row.size;
-
-              historicalRecords[row.number].codingTime = row.codingTime;
-              historicalRecords[row.number].initialCommitCreatedAt =
-                row.initialCommitCreatedAt !== ''
-                  ? new Date(row.initialCommitCreatedAt)
-                  : null;
-              historicalRecords[row.number].initialCommits = {
-                count: row['initialCommits.count'],
-                additions: row['initialCommits.additions'],
-                deletions: row['initialCommits.deletions'],
-              };
-              historicalRecords[row.number].lastCommitCreatedAt =
-                row.lastCommitCreatedAt !== ''
-                  ? new Date(row.lastCommitCreatedAt)
-                  : null;
-              historicalRecords[row.number].lastProcessed = new Date(
-                row.lastProcessed,
-              );
-              historicalRecords[row.number].maturity = row.maturity;
-              historicalRecords[row.number].reworkCommits = {
-                count: row['reworkCommits.count'],
-                additions: row['reworkCommits.additions'],
-                deletions: row['reworkCommits.deletions'],
-              };
-              historicalRecords[row.number].titleMaturity = row.titleMaturity;
-            }
-          })
-          .on('end', () => {
-            resolve(historicalRecords);
-          })
-          .on('error', error => reject(error));
-      } else {
-        resolve(historicalRecords);
+                historicalRecords[row.number].codingTime = row.codingTime;
+                historicalRecords[row.number].initialCommitCreatedAt =
+                  row.initialCommitCreatedAt !== ''
+                    ? new Date(row.initialCommitCreatedAt)
+                    : null;
+                historicalRecords[row.number].initialCommits = {
+                  count: row['initialCommits.count'],
+                  additions: row['initialCommits.additions'],
+                  deletions: row['initialCommits.deletions'],
+                };
+                historicalRecords[row.number].lastCommitCreatedAt =
+                  row.lastCommitCreatedAt !== ''
+                    ? new Date(row.lastCommitCreatedAt)
+                    : null;
+                historicalRecords[row.number].lastProcessed = new Date(
+                  row.lastProcessed,
+                );
+                historicalRecords[row.number].maturity = row.maturity;
+                historicalRecords[row.number].reworkCommits = {
+                  count: row['reworkCommits.count'],
+                  additions: row['reworkCommits.additions'],
+                  deletions: row['reworkCommits.deletions'],
+                };
+                historicalRecords[row.number].titleMaturity = row.titleMaturity;
+              }
+            })
+            .on('end', () => {
+              fs.rm(this.workingPrCsvFile, () => {
+              });
+              resolve(historicalRecords);
+            })
+            .on('error', error => reject(error));
+        } else {
+          resolve(historicalRecords);
+        }
+      } catch (error) {
+        console.error('Error loading historical PR data:', error);
+        throw error;
       }
     });
   };
